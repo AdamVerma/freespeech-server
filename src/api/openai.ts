@@ -1,5 +1,5 @@
-import express from 'express';
-import { prismaClient, openai } from '../resources';
+import express from "express";
+import { prismaClient, openai } from "../resources";
 
 const router = express.Router();
 
@@ -9,23 +9,16 @@ type OpenAIResponse = {
 };
 
 // Conjugate
-router.post<{}, OpenAIResponse>('/conjugate', async (req, res) => {
-  // Grab the request body
-  const { word, language, authentication } = req.body;
+router.post<{}, OpenAIResponse>("/conjugate", async (req, res) => {
+  // If no user object, return an error
+  if (!(req as unknown as { user: any }).user)
+    return res.json({ conjugations: null, error: "Invalid authentication." });
 
-  // Find the user
-  const auth = await prismaClient.accessToken.findUnique({
-    where: {
-      access_token: authentication,
-    },
-    include: {
-      user: true,
-    },
-  });
-  if (!auth) return res.status(400).json({ error: 'Invalid authentication.', conjugations: null });
+  // Grab the request body
+  const { word, language } = req.body;
 
   const response = await openai.createCompletion({
-    model: 'text-davinci-002',
+    model: "text-davinci-002",
     prompt: `list all ${language} conjugations and variations of the word "${word}", one word only, comma seperated list:`,
     temperature: 0.7,
     max_tokens: 256,
@@ -33,10 +26,18 @@ router.post<{}, OpenAIResponse>('/conjugate', async (req, res) => {
     frequency_penalty: 0,
     presence_penalty: 0,
   });
-  if (!response) return res.status(400).json({ error: 'OpenAI failed.', conjugations: null });
+  if (!response)
+    return res
+      .status(400)
+      .json({ error: "OpenAI failed.", conjugations: null });
 
-  const conjugated = response.data.choices[0].text?.split(',').map((conjugated_word) => conjugated_word.trim());
-  if (!conjugated) return res.status(400).json({ error: 'OpenAI failed.', conjugations: null });
+  const conjugated = response.data.choices[0].text
+    ?.split(",")
+    .map((conjugated_word) => conjugated_word.trim());
+  if (!conjugated)
+    return res
+      .status(400)
+      .json({ error: "OpenAI failed.", conjugations: null });
 
   return res.status(200).json({ error: null, conjugations: conjugated });
 });

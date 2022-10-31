@@ -1,8 +1,8 @@
-import express from 'express';
-import { prismaClient } from '../resources';
-import bcrypt from 'bcryptjs';
-import { User } from '@prisma/client';
-import isEmail from 'isemail';
+import { prismaClient } from "../resources";
+import express from "express";
+import bcrypt from "bcryptjs";
+import { User } from "@prisma/client";
+import isEmail from "isemail";
 
 const router = express.Router();
 
@@ -27,7 +27,7 @@ const createAccessToken = async (user: User) => {
 };
 
 // Create Account
-router.post<{}, AuthResponse>('/create', async (req, res) => {
+router.post<{}, AuthResponse>("/create", async (req, res) => {
   // Grab the request body
   const { email, password, name } = req.body;
 
@@ -35,7 +35,7 @@ router.post<{}, AuthResponse>('/create', async (req, res) => {
   if (!isEmail.validate(email)) {
     return res.status(400).json({
       access_token: null,
-      error: 'Invalid email',
+      error: "Invalid email",
     });
   }
 
@@ -43,7 +43,7 @@ router.post<{}, AuthResponse>('/create', async (req, res) => {
   if (password.length < 1) {
     return res.status(400).json({
       access_token: null,
-      error: 'No password',
+      error: "No password",
     });
   }
 
@@ -56,7 +56,7 @@ router.post<{}, AuthResponse>('/create', async (req, res) => {
   if (existingUser)
     return res.status(400).json({
       access_token: null,
-      error: 'Email already taken',
+      error: "Email already taken",
     });
 
   // Hash the password
@@ -65,46 +65,61 @@ router.post<{}, AuthResponse>('/create', async (req, res) => {
   // Create the user
   const user = await prismaClient.user.create({
     data: {
-      identifier_token: email + '',
-      email: email + '',
-      name: name + '',
-      hashed_password: hash + '',
+      identifier_token: email + "",
+      email: email + "",
+      name: name + "",
+      hashed_password: hash + "",
     },
   });
-  if (!user) return res.status(400).json({ error: 'User not created.', access_token: null });
+  if (!user)
+    return res
+      .status(400)
+      .json({ error: "User not created.", access_token: null });
 
   // Create the access token
   const accessToken = await createAccessToken(user);
-  if (!accessToken) res.status(400).json({ error: 'Access token not created.', access_token: null });
+  if (!accessToken)
+    res
+      .status(400)
+      .json({ error: "Access token not created.", access_token: null });
 
   // Send the access token to the client
   return res.status(200).json({ error: null, access_token: accessToken });
 });
 
 // Login
-router.post<{}, AuthResponse>('/login', async (req, res) => {
+router.post<{}, AuthResponse>("/login", async (req, res) => {
   // Grab the request body
   const { email, password } = req.body;
 
   // Find the user
   const user = await prismaClient.user.findUnique({
     where: {
-      email: email + '',
+      email: email + "",
     },
   });
   if (!user)
     return res.status(400).json({
       access_token: null,
-      error: 'User not found',
+      error: "User not found",
     });
 
   // Check the password
-  const passwordCorrect = await bcrypt.compare(password, user!.hashed_password!);
-  if (!passwordCorrect) return res.status(400).json({ error: 'Incorrect password.', access_token: null });
+  const passwordCorrect = await bcrypt.compare(
+    password,
+    user!.hashed_password!
+  );
+  if (!passwordCorrect)
+    return res
+      .status(400)
+      .json({ error: "Incorrect password.", access_token: null });
 
   // Create the access token
   const accessToken = await createAccessToken(user!);
-  if (!accessToken) return res.status(400).json({ error: 'Access token not created.', access_token: null });
+  if (!accessToken)
+    return res
+      .status(400)
+      .json({ error: "Access token not created.", access_token: null });
 
   // Send the access token to the client
   return res.status(200).json({ error: null, access_token: accessToken });
