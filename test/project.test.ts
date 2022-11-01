@@ -1,6 +1,8 @@
 import request from "supertest";
 import app from "../src/app";
 
+let testProjectId: string;
+
 // Creating Projects
 describe("Project Creation | POST /api/v1/project/create", () => {
   // create a project with a valid token
@@ -27,6 +29,8 @@ describe("Project Creation | POST /api/v1/project/create", () => {
           })
         );
         done();
+        // save the project id for later tests
+        testProjectId = res.body.id;
       });
   });
   // create a project with an invalid token
@@ -204,7 +208,7 @@ describe("Project Update | POST /api/v1/project/update", () => {
     request(app)
       .post("/api/v1/project/update")
       .send({
-        id: "cl9ygeqv00000rl874zv2ekok",
+        id: testProjectId,
         name: "This is my new edited title!",
       })
       .set({
@@ -230,7 +234,7 @@ describe("Project Update | POST /api/v1/project/update", () => {
     request(app)
       .post("/api/v1/project/update")
       .send({
-        id: "cl9ygeqv00000rl874zv2ekok",
+        id: testProjectId,
         isPublic: true,
       })
       .set({
@@ -276,7 +280,7 @@ describe("Project Update | POST /api/v1/project/update", () => {
     request(app)
       .post("/api/v1/project/update")
       .send({
-        id: "cl9ygeqv00000rl874zv2ekok",
+        id: testProjectId,
         name: "",
       })
       .set({
@@ -302,7 +306,7 @@ describe("Project Update | POST /api/v1/project/update", () => {
     request(app)
       .post("/api/v1/project/update")
       .send({
-        id: "cl9ygeqv00000rl874zv2ekok",
+        id: testProjectId,
         description: "",
       })
       .set({
@@ -328,7 +332,7 @@ describe("Project Update | POST /api/v1/project/update", () => {
     request(app)
       .post("/api/v1/project/update")
       .send({
-        id: "cl9ygeqv00000rl874zv2ekok",
+        id: testProjectId,
         isPublic: "",
       })
       .set({
@@ -343,6 +347,132 @@ describe("Project Update | POST /api/v1/project/update", () => {
             error: null,
             url: expect.any(String),
             id: expect.any(String),
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+});
+
+// Deleting a project
+describe("Project Delete | POST /api/v1/project/delete", () => {
+  // delete a project with a valid token
+  it("Successfully deletes a project and returns project information.", (done) => {
+    request(app)
+      .post("/api/v1/project/delete")
+      .send({
+        id: testProjectId,
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: null,
+            url: null,
+            id: null,
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+  // delete a project with an invalid token
+  it("Attempts to delete a project given an invalid token and returns an error object.", (done) => {
+    request(app)
+      .post("/api/v1/project/delete")
+      .send({
+        id: testProjectId,
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN + "invalid",
+      })
+      .expect(401)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: expect.any(String),
+          })
+        );
+        done();
+      });
+  });
+  // delete a project with empty id
+  it("Attempts to delete a project with an empty id and returns an error object.", (done) => {
+    request(app)
+      .post("/api/v1/project/delete")
+      .send({
+        id: "",
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(400)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: expect.any(String),
+            url: null,
+            id: null,
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+  // attempt a delete on a nonexistent project
+  it("Attempts to delete a project that does not exist and returns an error object.", (done) => {
+    request(app)
+      .post("/api/v1/project/delete")
+      .send({
+        id: "invalid",
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(404)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: expect.any(String),
+            url: null,
+            id: null,
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+  // attempt a delete on a project that does not belong to the user
+  it("Attempts to delete a project that does not belong to the user and returns an error object.", (done) => {
+    request(app)
+      .post("/api/v1/project/delete")
+      .send({
+        id: "cl9d233kj0000jw09y8duq1wt",
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(403)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: expect.any(String),
+            url: null,
+            id: null,
             project: null,
           })
         );

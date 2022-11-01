@@ -210,4 +210,55 @@ router.post<{}, ProjectResponse>("/update", async (req, res) => {
   });
 });
 
+router.post<{}, ProjectResponse>("/delete", async (req, res) => {
+  // get request body
+  const { id } = req.body;
+  // If no id is provided, return an error
+  if (!id) {
+    return res.status(400).json({
+      url: null,
+      id: null,
+      error: "Missing id",
+      project: null,
+    });
+  }
+  // Get a project given the id
+  const project: Project | null = await prismaClient.project.findUnique({
+    where: {
+      id: id + "",
+    },
+  });
+  // if there is no project, return an error
+  if (!project) {
+    return res.status(404).json({
+      url: null,
+      id: null,
+      error: "Project not found",
+      project: null,
+    });
+  }
+  // if the user is not the author, return an error
+  if (project.userId !== (req as unknown as { user: any }).user.id) {
+    return res.status(403).json({
+      url: null,
+      id: null,
+      error: "You are not the author of this project",
+      project: null,
+    });
+  }
+  // delete the project
+  await prismaClient.project.delete({
+    where: {
+      id: id + "",
+    },
+  });
+  // return the project
+  return res.status(200).json({
+    url: null,
+    id: null,
+    error: null,
+    project: null,
+  });
+});
+
 export default router;
