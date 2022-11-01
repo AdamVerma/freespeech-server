@@ -17,7 +17,7 @@ model User {
   hashed_password  String?
   theme            String?
   organizationId   String?
-  organization     Organization? @relation(fields: [organizationId], references: [id])
+  organization     Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   access_tokens    AccessToken[]
   s3_resources     S3Resource[]
   projects         Project[]
@@ -39,7 +39,7 @@ model AccessToken {
   id           String @id @unique @default(cuid())
   access_token String @unique @default(uuid())
   userId       String
-  user         User   @relation(fields: [userId], references: [id])
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Tile {
@@ -63,8 +63,8 @@ model Tile {
   tilePageId         Int?
   userId             String
   conjugations       String[]  @default([])
-  parent_page        TilePage? @relation(fields: [tilePageId], references: [id])
-  author             User      @relation(fields: [userId], references: [id])
+  parent_page        TilePage? @relation(fields: [tilePageId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  author             User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("tile")
 }
@@ -76,8 +76,8 @@ model TilePage {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   projectId  String?
-  Project    Project? @relation(fields: [projectId], references: [id])
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  Project    Project? @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   tiles      Tile[]
 
   @@index([user_id])
@@ -90,12 +90,13 @@ model Project {
   description String?
   image       String?
   columns     Int        @default(8)
-  index       Int
+  index       Int        @default(0) // this will be deprecated
+  slug        String?    @unique @default(cuid())
   public      Boolean    @default(false)
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
   userId      String
-  author      User       @relation(fields: [userId], references: [id])
+  author      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   pages       TilePage[]
 
   @@map("project")
@@ -107,5 +108,5 @@ model S3Resource {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   userId     String
-  author     User     @relation(fields: [userId], references: [id])
+  author     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

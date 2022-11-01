@@ -1,5 +1,6 @@
 import request from "supertest";
 import app from "../src/app";
+import { prismaClient } from "../src/resources";
 
 // Create account
 describe("Account Creation | POST /api/v1/auth/create", () => {
@@ -216,5 +217,16 @@ describe("Logging in/Account Validation | POST /api/v1/auth/login", () => {
         );
         done();
       });
+  });
+});
+
+// After all tests are done, delete the test account
+afterAll(async () => {
+  await prismaClient.user.deleteMany({
+    where: {
+      email: {
+        startsWith: "deleteme-",
+      },
+    },
   });
 });
