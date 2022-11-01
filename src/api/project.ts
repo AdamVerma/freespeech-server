@@ -109,7 +109,6 @@ router.post<{}, ProjectResponse>("/get", async (req, res) => {
     });
     // if the slug is provided, fetch the project by slug
   } else {
-    console.log(slug);
     project = await prismaClient.project.findUnique({
       where: {
         slug: slug + "",
@@ -151,6 +150,63 @@ router.post<{}, ProjectResponse>("/get", async (req, res) => {
     id: project.id,
     error: null,
     project,
+  });
+});
+
+router.post<{}, ProjectResponse>("/update", async (req, res) => {
+  // get request body
+  const { id, name, description, isPublic, columns } = req.body;
+  // If no id is provided, return an error
+  if (!id) {
+    return res.status(400).json({
+      url: null,
+      id: null,
+      error: "Missing id",
+      project: null,
+    });
+  }
+  // Get a project given the id
+  const project: Project | null = await prismaClient.project.findUnique({
+    where: {
+      id: id + "",
+    },
+  });
+  // if there is no project, return an error
+  if (!project) {
+    return res.status(404).json({
+      url: null,
+      id: null,
+      error: "Project not found",
+      project: null,
+    });
+  }
+  // if the user is not the author, return an error
+  if (project.userId !== (req as unknown as { user: any }).user.id) {
+    return res.status(403).json({
+      url: null,
+      id: null,
+      error: "You are not the author of this project",
+      project: null,
+    });
+  }
+  // update the project
+  const updatedProject: Project = await prismaClient.project.update({
+    where: {
+      id: id + "",
+    },
+    data: {
+      name: name + "" || project.name,
+      description: description + "" || project.description,
+      public: isPublic === "true" || isPublic === true || project.public,
+      columns: parseInt(columns + "") || project.columns,
+    },
+  });
+  // return the project
+  return res.status(200).json({
+    url: `/project/${updatedProject.slug}`,
+    id: updatedProject.id,
+    error: null,
+    project: null,
   });
 });
 

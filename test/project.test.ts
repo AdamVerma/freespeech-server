@@ -196,3 +196,157 @@ describe("Project Retrieval | POST /api/v1/project/get", () => {
       });
   });
 });
+
+// Updating a project
+describe("Project Update | POST /api/v1/project/update", () => {
+  // update a project with a valid token
+  it("Successfully updates a project and returns project information.", (done) => {
+    request(app)
+      .post("/api/v1/project/update")
+      .send({
+        id: "cl9ygeqv00000rl874zv2ekok",
+        name: "This is my new edited title!",
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: null,
+            url: expect.any(String),
+            id: expect.any(String),
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+  // update a project with an invalid token
+  it("Attempts to update a project given an invalid token and returns an error object.", (done) => {
+    request(app)
+      .post("/api/v1/project/update")
+      .send({
+        id: "cl9ygeqv00000rl874zv2ekok",
+        isPublic: true,
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN + "invalid",
+      })
+      .expect(401)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: expect.any(String),
+          })
+        );
+        done();
+      });
+  });
+  // update a project with empty id
+  it("Attempts to update a project with an empty id and returns an error object.", (done) => {
+    request(app)
+      .post("/api/v1/project/update")
+      .send({
+        id: "",
+        isPublic: true,
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(400)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: expect.any(String),
+          })
+        );
+        done();
+      });
+  });
+  // update a project with an empty name, it will return normal response no error
+  it("Attempts to update a project with an empty name and returns a normal response.", (done) => {
+    request(app)
+      .post("/api/v1/project/update")
+      .send({
+        id: "cl9ygeqv00000rl874zv2ekok",
+        name: "",
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: null,
+            url: expect.any(String),
+            id: expect.any(String),
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+  // update a project with an empty description, it will return normal response no error
+  it("Attempts to update a project with an empty description and returns a normal response.", (done) => {
+    request(app)
+      .post("/api/v1/project/update")
+      .send({
+        id: "cl9ygeqv00000rl874zv2ekok",
+        description: "",
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: null,
+            url: expect.any(String),
+            id: expect.any(String),
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+  // update a project with an empty isPublic, it will return normal response no error
+  it("Attempts to update a project with an empty isPublic and returns a normal response.", (done) => {
+    request(app)
+      .post("/api/v1/project/update")
+      .send({
+        id: "cl9ygeqv00000rl874zv2ekok",
+        isPublic: "",
+      })
+      .set({
+        Accept: "application/json",
+        Authorization: "Bearer " + process.env.TEST_TOKEN,
+      })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            error: null,
+            url: expect.any(String),
+            id: expect.any(String),
+            project: null,
+          })
+        );
+        done();
+      });
+  });
+});
