@@ -1,13 +1,16 @@
 import { User } from "@prisma/client";
 import { prismaClient } from "./resources";
 
-export default function (token: string): {
+export default async function (token: string): Promise<{
   success: boolean;
   user: User | null;
   response: string | null;
-} {
+}> {
+  if (token === undefined || !token)
+    return { success: false, user: null, response: "No token provided." };
+
   // Grab the user from their access token
-  const auth = prismaClient.accessToken.findUnique({
+  const auth = await prismaClient.accessToken.findUnique({
     where: {
       access_token: token,
     },

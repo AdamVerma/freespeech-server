@@ -1,31 +1,39 @@
 import { NextFunction, Request, Response } from "express";
-
-import ErrorResponse from "./interfaces/ErrorResponse";
 import Authentication from "./authentication";
 
-// Authentcation
-export function authentication(
+// auth middleware
+export async function handleAuth(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  // Grab the access token from the request
-  const token = req.headers.authorization;
+  // routes that dont require auth
+  const noAuthRoutes = ["auth"];
 
-  // Get the authentication status of the token
-  const authenticationStatus = Authentication(token + "");
-  if (!authenticationStatus.success) {
+  // if the subroute is in the no auth needed routes, continue
+  const subroute = req.url.split("/")[3].toLowerCase();
+  if (!req.headers.authorization && noAuthRoutes.includes(subroute)) {
     next();
-  } else {
+    return;
+  }
+
+  // Grab the access token from the request
+  const token = req.headers.authorization?.split(" ")[1];
+  // Get the authentication status of the token
+  const authenticationStatus = await Authentication(token + "");
+
+  if (authenticationStatus.success) {
     // Delete the hashed password from the user object
     delete (authenticationStatus as { user: { hashed_password?: string } }).user
       .hashed_password;
 
     // Add the user to the request object
     (req as unknown as { user: any }).user = authenticationStatus.user;
-
-    // Continue to the next function
+    // Continue to the next middleware
     next();
+  } else {
+    // Send the error response
+    res.status(401).send({ error: authenticationStatus.response });
   }
 }
 
@@ -40,7 +48,7 @@ export function notFound(req: Request, res: Response, next: NextFunction) {
 export function errorHandler(
   err: Error,
   req: Request,
-  res: Response<ErrorResponse>,
+  res: Response<{ message: string; stack?: string }>,
   next: NextFunction
 ) {
   const statusCode = res.statusCode !== 200 ? res.statusCode : 500;

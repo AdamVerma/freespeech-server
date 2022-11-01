@@ -10,10 +10,6 @@ type OpenAIResponse = {
 
 // Conjugate
 router.post<{}, OpenAIResponse>("/conjugate", async (req, res) => {
-  // If no user object, return an error
-  if (!(req as unknown as { user: any }).user)
-    return res.json({ conjugations: null, error: "Invalid authentication." });
-
   // Grab the request body
   const { word, language } = req.body;
 
