@@ -1,6 +1,6 @@
 # FreeSpeech Server
 
-<img width="960" alt="fs-digram" src="https://user-images.githubusercontent.com/18383101/199580206-ddd7bc75-569e-4df3-94ac-c444cd781711.png">
+<img width="960" alt="new-dia" src="https://user-images.githubusercontent.com/18383101/199580459-bd85bfe5-cb03-4ea8-bc90-aea647ac0a1e.png">
 
 This is the server portion of the FreeSpeech application. This is a private API inteded to be accessed by the FreeSpeech client, and it handles everything from account authentication to project editing and even text to speech synthesis.
 
