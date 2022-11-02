@@ -125,4 +125,34 @@ router.post<{}, AuthResponse>("/login", async (req, res) => {
   return res.status(200).json({ error: null, access_token: accessToken });
 });
 
+// Validate Email
+router.post<{}, AuthResponse>("/validate-email", async (req, res) => {
+  // Grab the request body
+  const { email } = req.body;
+
+  // Check if the email is valid
+  if (!isEmail.validate(email)) {
+    return res.status(400).json({
+      access_token: null,
+      error: "Invalid email",
+    });
+  }
+
+  // Check if the email has been taken
+  const existingUser = await prismaClient.user.findUnique({
+    where: {
+      email,
+    },
+  });
+  if (existingUser) {
+    return res.status(400).json({
+      access_token: null,
+      error: "Email already taken",
+    });
+  }
+
+  // Send the access token to the client
+  return res.status(200).json({ error: null, access_token: null });
+});
+
 export default router;

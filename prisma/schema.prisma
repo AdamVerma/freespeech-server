@@ -89,6 +89,7 @@ model Project {
   name        String
   description String?
   image       String?
+  cloned_from String?
   columns     Int        @default(8)
   index       Int        @default(0) // this will be deprecated
   slug        String?    @unique @default(cuid())
