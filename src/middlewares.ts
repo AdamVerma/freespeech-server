@@ -12,7 +12,7 @@ export async function handleAuth(
 
   // if the subroute is in the no auth needed routes, continue
   const subroute = req.url.split("/")[3].toLowerCase();
-  if (!req.headers.authorization && noAuthRoutes.includes(subroute)) {
+  if (noAuthRoutes.includes(subroute)) {
     next();
     return;
   }
