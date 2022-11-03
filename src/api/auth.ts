@@ -9,7 +9,7 @@ const router = express.Router();
 type AuthResponse = {
   access_token: string | null;
   error: string | null;
-  user?: User;
+  user?: any;
 };
 
 // Creates an access token for a user
@@ -183,9 +183,12 @@ router.get<{}, AuthResponse>("/me", async (req, res) => {
       error: "Invalid access token",
     });
 
+  const user = token.user as unknown as { hashed_password?: string };
+  delete user.hashed_password;
+
   return res
     .status(200)
-    .json({ error: null, access_token: accessToken, user: token.user });
+    .json({ error: null, access_token: accessToken, user: user });
 });
 
 export default router;
