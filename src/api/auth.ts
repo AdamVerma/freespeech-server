@@ -9,6 +9,7 @@ const router = express.Router();
 type AuthResponse = {
   access_token: string | null;
   error: string | null;
+  user?: User;
 };
 
 // Creates an access token for a user
@@ -153,6 +154,38 @@ router.post<{}, AuthResponse>("/validate-email", async (req, res) => {
 
   // Send the access token to the client
   return res.status(200).json({ error: null, access_token: null });
+});
+
+// Me
+router.get<{}, AuthResponse>("/me", async (req, res) => {
+  // Grab the access token
+  const accessToken = req.headers.authorization?.split(" ")[1];
+
+  // Check if the access token is valid
+  if (!accessToken)
+    return res.status(400).json({
+      access_token: null,
+      error: "No access token",
+    });
+
+  // Find the access token
+  const token = await prismaClient.accessToken.findUnique({
+    where: {
+      access_token: accessToken,
+    },
+    include: {
+      user: true,
+    },
+  });
+  if (!token)
+    return res.status(400).json({
+      access_token: null,
+      error: "Invalid access token",
+    });
+
+  return res
+    .status(200)
+    .json({ error: null, access_token: accessToken, user: token.user });
 });
 
 export default router;
