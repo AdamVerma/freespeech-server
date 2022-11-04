@@ -1,4 +1,4 @@
-import { type Response } from "express";
+import express, { type Response } from "express";
 import app from "./app";
 
 const port = process.env.PORT || 5000;
@@ -15,3 +15,4 @@ function errorHandler(err: string, res: Response) {
 
 //@ts-ignore
 app.use(errorHandler);
+app.use(express.json({ limit: "50mb" }));
