@@ -9,7 +9,7 @@ type S3Response = {
 };
 
 // Upload
-router.post<{}, S3Response>("/upload", async (req, res) => {
+router.post("/upload", express.json({ limit: "50mb" }), async (req, res) => {
   const { file, name } = req.body;
   // generate new file name with the name of the file
   const filename: string = Date.now().toString().substring(0, 5) + name;
