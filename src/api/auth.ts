@@ -183,8 +183,21 @@ router.get<{}, AuthResponse>("/me", async (req, res) => {
       error: "Invalid access token",
     });
 
-  const user = token.user as unknown as { hashed_password?: string };
-  delete user.hashed_password;
+  let user = await prismaClient.user.findUnique({
+    where: {
+      id: token.user.id,
+    },
+    include: {
+      projects: true,
+    },
+  });
+  if (!user) {
+    return res.status(400).json({
+      access_token: null,
+      error: "Invalid access token",
+    });
+  }
+  delete (user as unknown as { hashed_password?: any }).hashed_password;
 
   return res
     .status(200)
