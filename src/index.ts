@@ -1,4 +1,5 @@
-import app from './app';
+import { type Response } from "express";
+import app from "./app";
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
@@ -6,3 +7,11 @@ app.listen(port, () => {
   console.log(`Listening: http://localhost:${port}`);
   /* eslint-enable no-console */
 });
+
+function errorHandler(err: string, res: Response) {
+  res.status(500);
+  res.render("error", { error: err });
+}
+
+//@ts-ignore
+app.use(errorHandler);
