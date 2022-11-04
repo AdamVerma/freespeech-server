@@ -21,11 +21,11 @@ app.get<{}, { message: string }>("/", (req, res) => {
   });
 });
 
+app.use(express.json({ limit: "50mb" }));
 app.use(middlewares.handleAuth);
-
 app.use("/api/v1", api);
-
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
+app.use(express.json({ limit: "50mb" }));
 
 export default app;

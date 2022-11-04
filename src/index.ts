@@ -12,6 +12,4 @@ function errorHandler(err: string, res: Response) {
   res.status(500);
   res.render("error", { error: err });
 }
-
-//@ts-ignore
-app.use(errorHandler);
+app.use(express.json({ limit: "50mb" }));
