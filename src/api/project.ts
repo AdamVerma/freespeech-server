@@ -252,9 +252,9 @@ router.post<{}, ProjectResponse>("/update", async (req, res) => {
       id: id + "",
     },
     data: {
-      name: name + "" || project.name,
-      image: image + "" || project.image,
-      description: description + "" || project.description,
+      name: name || project.name,
+      image: image || project.image,
+      description: description || project.description,
       public: isPublic === "true" || isPublic === true || project.public,
       columns: parseInt(columns + "") || project.columns,
     },
