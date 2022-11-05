@@ -212,7 +212,7 @@ router.post<{}, ProjectResponse>("/get", async (req, res) => {
 
 router.post<{}, ProjectResponse>("/update", async (req, res) => {
   // get request body
-  const { id, name, description, isPublic, columns } = req.body;
+  const { id, name, description, isPublic, columns, image } = req.body;
   // If no id is provided, return an error
   if (!id) {
     return res.status(400).json({
@@ -253,6 +253,7 @@ router.post<{}, ProjectResponse>("/update", async (req, res) => {
     },
     data: {
       name: name + "" || project.name,
+      image: image + "" || project.image,
       description: description + "" || project.description,
       public: isPublic === "true" || isPublic === true || project.public,
       columns: parseInt(columns + "") || project.columns,
